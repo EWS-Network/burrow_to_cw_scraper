@@ -1,0 +1,22 @@
+---
+# Working configuration
+
+url: http://127.0.0.1:8080/
+
+clusters:
+  - name: cluster01
+    groups:
+      - name: app01
+
+  - name: cluster01
+    groups_regex: 'prefix.user.*'
+    cloudwatch:
+      iam:
+        RoleArn: arn:aws:iam::123456789012:role/some-role
+        SessionName: forteamB
+
+
+cloudwatch:
+  Namespace: KAFKA
+  Metrics:
+    - consumer-lag

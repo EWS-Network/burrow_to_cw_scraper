@@ -1,0 +1,124 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "config",
+    "type": "object",
+    "title": "config",
+    "description": "Master configuration",
+    "required": [
+        "clusters",
+        "url"
+    ],
+    "properties": {
+        "url": {
+            "type": "string",
+            "format": "uri"
+        },
+        "clusters": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ClusterDef"
+            },
+            "uniqueItems": true
+        },
+        "cloudwatch": {
+            "$ref": "#/definitions/CloudwatchConfig"
+        }
+    },
+    "definitions": {
+        "ClusterDef": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConsumerGroup"
+                    },
+                    "description": "List of consumer groups to scan for and report metrics"
+                },
+                "groups_regex": {
+                    "type": "string",
+                    "description": "A regular expression to identify consumer groups with"
+                },
+                "groups_blacklist": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "scraper_config.spec.json#/definitions/ConsumerGroup"
+                    },
+                    "description": "List of consumer group names to ignore"
+                },
+                "groups_blacklist_regex": {
+                    "type": "string",
+                    "description": "Regular expression of consumer groups to ignore. Takes precedence over groups_regex"
+                },
+                "cloudwatch": {
+                    "$ref": "#/definitions/CloudwatchConfig"
+                }
+            }
+        },
+        "ConsumerGroup": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ]
+        },
+        "CloudwatchConfig": {
+            "type": "object",
+            "properties": {
+                "Namespace": {
+                    "type": "string",
+                    "default": "Kafka",
+                    "description": "The Cloudwatch Namespace for metrics"
+                },
+                "Metrics": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MetricsDef"
+                    },
+                    "default": [
+                        "consumer-lag"
+                    ]
+                },
+                "Interval": {
+                    "type": "integer",
+                    "default": 60
+                },
+                "iam": {
+                    "$ref": "#/definitions/IamOverride"
+                }
+            }
+        },
+        "MetricsDef": {
+            "type": "string",
+            "enum": [
+                "consumer-lag",
+                "status"
+            ]
+        },
+        "IamOverride": {
+            "type": "object",
+            "properties": {
+                "RoleArn": {
+                    "type": "string",
+                    "pattern": "^arn:aws(?:-[a-z]+)?:iam::[0-9]{12}:role/[\\S]+$"
+                },
+                "SessionName": {
+                    "type": "string",
+                    "description": "The name of the IAM session used for AssumeRole",
+                    "default": "metrics@BurrowToAWSCloudWatch"
+                },
+                "RegionName": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
